@@ -1,4 +1,8 @@
+import 'package:uuid/uuid.dart';
+
 Future<Map<String, dynamic>> generateKdsModel() async {
+  final uuid = Uuid();
+
   // Simulated invoice product item
   final mockProduct = {
     "productNameAr": "شاورما دجاج",
@@ -28,13 +32,16 @@ Future<Map<String, dynamic>> generateKdsModel() async {
     {"variantValueId": 102, "languageId": 2, "name": "جبنة زيادة"},
   ];
 
+  // Unique ID based on current time
+  final uniqueId = DateTime.now().millisecondsSinceEpoch;
+
   final mockInvoice = {
-    "id": 999,
+    "id": uniqueId,
     "createdAt": DateTime.now().toIso8601String(),
     "products": [mockItem],
   };
 
-  // Simulate extracting modifiers
+  // Extract modifier names
   List<int> ids =
       (mockItem["variations"] as List?)
           ?.map<int>((e) => e["variation"]["variantValueId"] as int)
@@ -54,6 +61,7 @@ Future<Map<String, dynamic>> generateKdsModel() async {
     }
   }
 
+  // Construct order data
   final data = {
     "id": mockInvoice["id"],
     "invoiceId": "INV-${mockInvoice["id"]}",
@@ -62,16 +70,20 @@ Future<Map<String, dynamic>> generateKdsModel() async {
     "status": "Pending",
     "table_number": "",
     "customer_name": "",
-    "items": [
-      {
+    "items": List.generate(3, (index) {
+      return {
+        "sortOrder": index + 1,
+        "itemGuid": uuid.v4(),
+        "customerNo": "P1",
+        "itemStatus": "Pending",
         "name": mockProduct["productNameAr"],
         "nameEn": mockProduct["productNameEn"],
         "quantity": mockItem["quantity"].toString(),
         "orderRefId": "INV-${mockInvoice["id"]}",
         "modifires": [mockUnit["nameAr"], ...modifires].toString(),
         "modifiresEn": [mockUnit["nameEn"], ...modifiresEn].toString(),
-      },
-    ],
+      };
+    }),
   };
 
   return data;

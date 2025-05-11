@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
- 
- import 'package:local_server/dumy_data.dart';
+import 'package:local_server/dumy_data.dart';
 
 import 'http_requests.dart';
 import 'local_end_points.dart';
@@ -21,9 +20,7 @@ class ClientService {
       host: port == null ? '$hostIp:8080' : '$hostIp:$port',
       path: LocalEndPoints.checkConnection,
       timeout: timeout,
-      queryParams: {
-        'senderIp': "",
-      },
+      queryParams: {'senderIp': ""},
     );
     response.fold(
       (l) {
@@ -38,6 +35,35 @@ class ClientService {
     return isSuccess;
   }
 
+  Future<(bool,String)> checkItemValidToUpdate({
+    required String hostIp,
+    int? port,
+    int timeout = 1000,
+    required String orderId,
+    required String itemGuid,
+    required String delete,
+  }) async {
+    bool isSuccess = false;
+    final response = await LocalRequest.getRequest(
+      host: port == null ? '$hostIp:8080' : '$hostIp:$port',
+      path: LocalEndPoints.checkItemValidToUpdate,
+      timeout: timeout,
+      queryParams: {'orderId': orderId, 'itemGuid': itemGuid, 'delete': delete},
+    );
+    response.fold(
+      (l) {
+        log(l.code.toString());
+        log(l.message);
+        isSuccess = false;
+      },
+      (r) {
+        isSuccess = true;
+        log(r.body);
+      },
+    );
+    return (isSuccess, response.fold((l) => l.message, (r) => r.body));
+  }
+
   //
   _completeSendToNotifierCompleter() {
     _clientCompleter?.complete();
@@ -46,7 +72,7 @@ class ClientService {
 
   Future<void> sendOrderToKDS({
     required String hostIp,
-     // required int orderId,
+    // required int orderId,
   }) async {
     final orderModel = await generateKdsModel();
     if (_clientCompleter != null && !_clientCompleter!.isCompleted) {
@@ -74,5 +100,3 @@ class ClientService {
     );
   }
 }
-
-

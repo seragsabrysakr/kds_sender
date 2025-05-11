@@ -26,15 +26,16 @@ class LocalRequest {
       http.Response response = await client
           .get(uri, headers: headers)
           .timeout(Duration(milliseconds: timeout ?? 4000));
-
+      log("response body is ${response.body}");
       // log(response.body.toString());
       if (response.statusCode == 200) {
-        log(response.toString());
         return Right(response);
       } else if (response.statusCode == 400) {
         return Left(Failure(400, 'CONNETION_ERROR'));
       } else {
-        return Left(Failure(401, response.body.toString()));
+        final decoded = jsonDecode(response.body);
+        final message = decoded['message'] as String;
+        return Left(Failure(response.statusCode, message));
       }
     } catch (e, t) {
       log(e.toString());
@@ -45,12 +46,13 @@ class LocalRequest {
     }
   }
 
-  static Future<Either<Failure, http.Response>> postRequest(
-      {required String host,
-      required String path,
-      int? timeout,
-      Map<String, dynamic>? queryParams,
-      required Map<String, dynamic> body}) async {
+  static Future<Either<Failure, http.Response>> postRequest({
+    required String host,
+    required String path,
+    int? timeout,
+    Map<String, dynamic>? queryParams,
+    required Map<String, dynamic> body,
+  }) async {
     try {
       final client = http.Client();
       final uri = Uri.http(host, path, queryParams);
@@ -61,11 +63,7 @@ class LocalRequest {
       };
 
       http.Response response = await client
-          .post(
-            uri,
-            headers: headers,
-            body: json.encode(body),
-          )
+          .post(uri, headers: headers, body: json.encode(body))
           .timeout(Duration(milliseconds: timeout ?? 4000));
 
       if (response.statusCode == 200) {
