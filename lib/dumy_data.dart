@@ -1,5 +1,15 @@
 import 'package:uuid/uuid.dart';
 
+enum CourseSort {
+  first(value: 1),
+  second(value: 2),
+  third(value: 3);
+
+  final int value;
+
+  const CourseSort({required this.value});
+}
+
 Future<Map<String, dynamic>> generateKdsModel() async {
   final uuid = Uuid();
 
@@ -70,9 +80,21 @@ Future<Map<String, dynamic>> generateKdsModel() async {
     "status": "Pending",
     "table_number": "",
     "customer_name": "",
-    "items": List.generate(3, (index) {
-      return {
-        "sortOrder": index + 1,
+    "items": [
+      {
+        "sortOrder": CourseSort.first.value,
+        "itemGuid": uuid.v4(),
+        "customerNo": "P1",
+        "itemStatus": "Pending",
+        "name": mockProduct["productNameAr"],
+        "nameEn": mockProduct["productNameEn"],
+        "quantity": mockItem["quantity"].toString(),
+        "orderRefId": "INV-${mockInvoice["id"]}",
+        // "modifires": [mockUnit["nameAr"], ...modifires].toString(),
+        // "modifiresEn": [mockUnit["nameEn"], ...modifiresEn].toString(),
+      },
+      {
+        "sortOrder": CourseSort.first.value,
         "itemGuid": uuid.v4(),
         "customerNo": "P1",
         "itemStatus": "Pending",
@@ -82,8 +104,44 @@ Future<Map<String, dynamic>> generateKdsModel() async {
         "orderRefId": "INV-${mockInvoice["id"]}",
         "modifires": [mockUnit["nameAr"], ...modifires].toString(),
         "modifiresEn": [mockUnit["nameEn"], ...modifiresEn].toString(),
-      };
-    }),
+      },
+      {
+        "sortOrder": CourseSort.second.value,
+        "itemGuid": uuid.v4(),
+        "customerNo": "P1",
+        "itemStatus": "Pending",
+        "name": mockProduct["productNameAr"],
+        "nameEn": mockProduct["productNameEn"],
+        "quantity": mockItem["quantity"].toString(),
+        "orderRefId": "INV-${mockInvoice["id"]}",
+        // "modifires": [mockUnit["nameAr"], ...modifires].toString(),
+        // "modifiresEn": [mockUnit["nameEn"], ...modifiresEn].toString(),
+      },
+      // {
+      //   "sortOrder": CourseSort.third.value,
+      //   "itemGuid": uuid.v4(),
+      //   "customerNo": "P1",
+      //   "itemStatus": "Pending",
+      //   "name": mockProduct["productNameAr"],
+      //   "nameEn": mockProduct["productNameEn"],
+      //   "quantity": mockItem["quantity"].toString(),
+      //   "orderRefId": "INV-${mockInvoice["id"]}",
+      //   "modifires": [mockUnit["nameAr"], ...modifires].toString(),
+      //   "modifiresEn": [mockUnit["nameEn"], ...modifiresEn].toString(),
+      // },
+      // {
+      //   "sortOrder": CourseSort.third.value,
+      //   "itemGuid": uuid.v4(),
+      //   "customerNo": "P1",
+      //   "itemStatus": "Pending",
+      //   "name": mockProduct["productNameAr"],
+      //   "nameEn": mockProduct["productNameEn"],
+      //   "quantity": mockItem["quantity"].toString(),
+      //   "orderRefId": "INV-${mockInvoice["id"]}",
+      //   "modifires": [mockUnit["nameAr"], ...modifires].toString(),
+      //   "modifiresEn": [mockUnit["nameEn"], ...modifiresEn].toString(),
+      // },
+    ],
   };
 
   return data;
