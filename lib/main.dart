@@ -1,6 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_server/client_service.dart';
+
+final appNavigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
   runApp(const MyApp());
@@ -13,6 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: appNavigatorKey,
       title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -35,12 +39,18 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _ipController = TextEditingController();
   final ClientService _clientService = ClientService();
   bool _isSending = false;
-  bool _isSending2 = false;
+  final bool _isSending2 = false;
 
   @override
   void dispose() {
     _ipController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    _ipController.text = kDebugMode ? "192.168.1.30" : "";
+    super.initState();
   }
 
   Future<void> _sendOrderToKDS() async {
@@ -57,9 +67,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
     try {
       await _clientService.sendOrderToKDS(hostIp: _ipController.text);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Order sent successfully!')));
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -67,42 +74,6 @@ class _MyHomePageState extends State<MyHomePage> {
     } finally {
       setState(() {
         _isSending = false;
-      });
-    }
-  }
-
-  Future<void> _updateItemToKDS() async {
-    if (_ipController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please enter a host IP')));
-      return;
-    }
-
-    setState(() {
-      _isSending2 = true;
-    });
-
-    try {
-      final result = await _clientService.checkItemValidToUpdate(
-        hostIp: _ipController.text,
-        orderId: "1746969192103",
-        itemGuid: "0e66bbb4-1f6e-4c6c-9ad3-8f697897ad48",
-        delete: "1",
-      );
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(result.$2)));
-      setState(() {
-        _isSending2 = false;
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error sending order: $e')));
-    } finally {
-      setState(() {
-        _isSending2 = false;
       });
     }
   }
@@ -142,17 +113,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       ? const CircularProgressIndicator.adaptive()
                       : const Icon(Icons.send),
               label: Text(_isSending ? 'Sending...' : 'Send Order to KDS'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
-              ),
-            ),
-            ElevatedButton.icon(
-              onPressed: _isSending2 ? null : _updateItemToKDS,
-              icon:
-                  _isSending2
-                      ? const CircularProgressIndicator.adaptive()
-                      : const Icon(Icons.send),
-              label: Text(_isSending2 ? 'Sending...' : 'Update Item to KDS'),
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
               ),
