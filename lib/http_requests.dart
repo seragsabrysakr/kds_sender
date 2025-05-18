@@ -25,7 +25,7 @@ class LocalRequest {
       log('queryParams: $queryParams');
       http.Response response = await client
           .get(uri, headers: headers)
-          .timeout(Duration(milliseconds: timeout ?? 4000));
+          .timeout(Duration(milliseconds: timeout ?? 30000));
       log("response body is ${response.body}");
       // log(response.body.toString());
       if (response.statusCode == 200) {
@@ -51,25 +51,28 @@ class LocalRequest {
     required String path,
     int? timeout,
     Map<String, dynamic>? queryParams,
+    Map<String, String>? headers,
     required Map<String, dynamic> body,
   }) async {
     try {
       final client = http.Client();
       final uri = Uri.http(host, path, queryParams);
-      var headers = {
+      var requestHeaders = {
         'Content-Type': 'application/json',
         // 'connection': 'keep-alive',
         //  "Keep-Alive": "timeout=10, max=1000"
       };
-
+      if (headers != null) {
+        requestHeaders.addAll(headers);
+      }
       http.Response response = await client
-          .post(uri, headers: headers, body: json.encode(body))
-          .timeout(Duration(milliseconds: timeout ?? 4000));
+          .post(uri, headers: requestHeaders, body: json.encode(body))
+          .timeout(Duration(milliseconds: timeout ?? 30000));
 
       if (response.statusCode == 200) {
         return Right(response);
       } else {
-        return Left(Failure(401, 'CONNETION_ERROR'));
+        return Left(Failure(response.statusCode, response.body));
       }
     } catch (e, t) {
       log(e.toString());
